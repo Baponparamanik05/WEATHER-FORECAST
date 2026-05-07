@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather Forecast App</title>
+
+<style>
+    *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box;
+        font-family:Arial, sans-serif;
+    }
+
+    body{
+        height:100vh;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        background:linear-gradient(135deg,#4facfe,#00f2fe);
+    }
+
+    .container{
+        width:350px;
+        background:white;
+        padding:25px;
+        border-radius:20px;
+        box-shadow:0 10px 25px rgba(0,0,0,0.2);
+        text-align:center;
+        animation:fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn{
+        from{
+            opacity:0;
+            transform:translateY(20px);
+        }
+        to{
+            opacity:1;
+            transform:translateY(0);
+        }
+    }
+
+    h1{
+        margin-bottom:20px;
+        color:#333;
+    }
+
+    input, button{
+        width:100%;
+        padding:12px;
+        margin-top:10px;
+        border:none;
+        border-radius:10px;
+        font-size:16px;
+    }
+
+    input{
+        background:#f1f1f1;
+    }
+
+    button{
+        background:#4facfe;
+        color:white;
+        cursor:pointer;
+        transition:0.3s;
+    }
+
+    button:hover{
+        background:#008cff;
+    }
+
+    .weather-box{
+        margin-top:20px;
+        padding:15px;
+        border-radius:15px;
+        background:#f7f7f7;
+        display:none;
+        animation:fadeIn 0.5s ease;
+    }
+
+    .weather-box img{
+        width:80px;
+    }
+
+    .temp{
+        font-size:40px;
+        font-weight:bold;
+        color:#333;
+    }
+
+    .details{
+        margin-top:10px;
+        color:#555;
+        line-height:1.8;
+    }
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Weather App</h1>
+
+    <input type="text" id="city" placeholder="Enter City Name">
+
+    <input type="date" id="date">
+
+    <button onclick="getWeather()">Get Weather</button>
+
+    <div class="weather-box" id="weatherBox">
+
+        <h2 id="cityName"></h2>
+
+        <img id="icon" src="" alt="Weather Icon">
+
+        <div class="temp" id="temp"></div>
+
+        <div class="details">
+            <p id="condition"></p>
+            <p id="humidity"></p>
+            <p id="wind"></p>
+            <p id="dateText"></p>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const apiKey = "999616c43a764d4b846141555251512";
+
+async function getWeather(){
+
+    const city = document.getElementById("city").value;
+    const selectedDate = document.getElementById("date").value;
+
+    if(city === ""){
+        alert("Please enter a city name");
+        return;
+    }
+
+    try{
+
+        const response = await fetch(
+            `http://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${city}&days=7&aqi=yes&alerts=yes`
+        );
+
+        const data = await response.json();
+
+        console.log(data);
+
+        let forecastDay = data.forecast.forecastday[0];
+
+        if(selectedDate){
+
+            forecastDay = data.forecast.forecastday.find(day => day.date === selectedDate);
+
+            if(!forecastDay){
+                alert("Selected date forecast not available");
+                return;
+            }
+        }
+
+        document.getElementById("weatherBox").style.display = "block";
+
+        document.getElementById("cityName").innerText =
+            data.location.name + ", " + data.location.country;
+
+        document.getElementById("temp").innerText =
+            forecastDay.day.avgtemp_c + "°C";
+
+        document.getElementById("condition").innerText =
+            "Condition: " + forecastDay.day.condition.text;
+
+        document.getElementById("humidity").innerText =
+            "Humidity: " + forecastDay.day.avghumidity + "%";
+
+        document.getElementById("wind").innerText =
+            "Wind: " + forecastDay.day.maxwind_kph + " kph";
+
+        document.getElementById("dateText").innerText =
+            "Date: " + forecastDay.date;
+
+        document.getElementById("icon").src =
+            "https:" + forecastDay.day.condition.icon;
+
+    }
+    catch(error){
+
+        alert("Error fetching weather data");
+        console.log(error);
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
